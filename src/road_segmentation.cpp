@@ -327,7 +327,7 @@ void RoadSegmentation::process_frame(std::vector<float>& nn_output, cv::Mat &mas
 
 void RoadSegmentation::segmentationCB(const std::string& /*name*/, const std::shared_ptr<dai::ADatatype>& data) {
 
-    //RCLCPP_WARN(getLogger(), "segmentationCB called");
+    RCLCPP_WARN(getLogger(), "segmentationCB called");
 
     // Cast input data
     auto in_det = std::dynamic_pointer_cast<dai::NNData>(data);
