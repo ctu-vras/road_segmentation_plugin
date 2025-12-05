@@ -1,11 +1,20 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!--
+SPDX-License-Identifier: BSD-3-Clause
+SPDX-FileCopyrightText: Czech Technical University in Prague
+-->
 <package format="3">
   <name>road_segmentation_plugin</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="herold.adam7@gmail.com">herolada</maintainer>
-  <license>TODO: License declaration</license>
+  <version>1.0.0</version>
+  <description>Luxonis OAK-D pipeline for running 3-class segmentation on the cameras.</description>
+
+  <maintainer email="peckama2@fel.cvut.cz">Martin Pecka</maintainer>
+
+  <license>BSD</license>
+
+  <author email="peckama2@fel.cvut.cz">Martin Pecka</author>
+  <author email="herolada@fel.cvut.cz">Adam Herold</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
@@ -29,8 +38,8 @@
   <exec_depend>pluginlib</exec_depend>
   <exec_depend>rclcpp</exec_depend>
 
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
+  <test_depend>cras_lint</test_depend>
+
   <export>
     <build_type>ament_cmake</build_type>
   </export>

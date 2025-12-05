@@ -1,55 +1,100 @@
-#include "road_segmentation_plugin/nn_wrapper_road_segmentation.hpp"
-#include "road_segmentation_plugin/road_segmentation.hpp"
+// SPDX-License-Identifier: BSD-3-Clause
+// SPDX-FileCopyrightText: Czech Technical University in Prague
 
-#include "depthai/device/Device.hpp"
-#include "depthai/pipeline/Pipeline.hpp"
-#include "depthai/pipeline/node/DetectionNetwork.hpp"
-#include "depthai_ros_driver/dai_nodes/nn/detection.hpp"
-#include "depthai_ros_driver/dai_nodes/nn/segmentation.hpp"
-// #include "depthai_ros_driver/dai_nodes/nn/road_segmentation.hpp"
-#include "depthai_ros_driver/param_handlers/nn_param_handler.hpp"
-#include "rclcpp/node.hpp"
+#include <memory>
+#include <string>
 
-namespace depthai_ros_driver {
-namespace dai_nodes {
-NNWrapperRoadSegmentation::NNWrapperRoadSegmentation(const std::string& daiNodeName,
-                     std::shared_ptr<rclcpp::Node> node,
-                     std::shared_ptr<dai::Pipeline> pipeline,
-                     const dai::CameraBoardSocket& socket)
-    : BaseNode(daiNodeName, node, pipeline) {
-    RCLCPP_DEBUG(node->get_logger(), "Creating node %s base", daiNodeName.c_str());
-    
-    ph = std::make_unique<param_handlers::NNParamHandler>(node, daiNodeName, socket);
-    auto family = ph->getNNFamily();
-    nnNode = std::make_unique<dai_nodes::nn::RoadSegmentation>(getName(), getROSNode(), pipeline, socket);
+#include <depthai/device/Device.hpp>
+#include <depthai/pipeline/Pipeline.hpp>
 
-    RCLCPP_DEBUG(node->get_logger(), "Base node %s created", daiNodeName.c_str());
+#include <depthai_ros_driver/dai_nodes/nn/segmentation.hpp>
+#include <depthai_ros_driver/param_handlers/nn_param_handler.hpp>
+#include <rclcpp/node.hpp>
+#include <road_segmentation_plugin/nn_wrapper_road_segmentation.hpp>
+#include <road_segmentation_plugin/road_segmentation.hpp>
+
+namespace depthai_ros_driver::dai_nodes
+{
+
+NNWrapperRoadSegmentation::NNWrapperRoadSegmentation(
+  const std::string& daiNodeName, std::shared_ptr<rclcpp::Node> node, std::shared_ptr<dai::Pipeline> pipeline,
+#if DEPTHAI_VERSION_MAJOR >= 3
+  const std::string& deviceName, const bool rsCompat,
+#endif
+  dai_nodes::SensorWrapper& camNode, const dai::CameraBoardSocket& socket)
+  : BaseNode(daiNodeName, node, pipeline
+#if DEPTHAI_VERSION_MAJOR >= 3
+      , deviceName, rsCompat
+#endif
+  )
+{
+  RCLCPP_DEBUG(node->get_logger(), "Creating node %s base", daiNodeName.c_str());
+
+  ph = std::make_unique<param_handlers::NNParamHandler>(node, daiNodeName,
+#if DEPTHAI_VERSION_MAJOR >= 3
+    deviceName, rsCompat,
+#endif
+    socket);
+
+  nnNode = std::make_unique<dai_nodes::nn::RoadSegmentation>(getName(), getROSNode(), pipeline,
+#if DEPTHAI_VERSION_MAJOR >= 3
+    deviceName, rsCompat,
+#endif
+    camNode, socket);
+
+  RCLCPP_DEBUG(node->get_logger(), "Base node %s created", daiNodeName.c_str());
 }
+
 NNWrapperRoadSegmentation::~NNWrapperRoadSegmentation() = default;
 
-void NNWrapperRoadSegmentation::setNames() {}
-
-void NNWrapperRoadSegmentation::setXinXout(std::shared_ptr<dai::Pipeline> /*pipeline*/) {}
-
-void NNWrapperRoadSegmentation::setupQueues(std::shared_ptr<dai::Device> device) {
-    nnNode->setupQueues(device);
-}
-void NNWrapperRoadSegmentation::closeQueues() {
-    nnNode->closeQueues();
+void NNWrapperRoadSegmentation::setNames()
+{
 }
 
-void NNWrapperRoadSegmentation::link(dai::Node::Input in, int linkType) {
-    nnNode->link(in, linkType);
+void NNWrapperRoadSegmentation::setupQueues(std::shared_ptr<dai::Device> device)
+{
+  nnNode->setupQueues(device);
 }
 
-dai::Node::Input NNWrapperRoadSegmentation::getInput(int linkType) {
-    return nnNode->getInput(linkType);
+void NNWrapperRoadSegmentation::closeQueues()
+{
+  nnNode->closeQueues();
 }
 
-void NNWrapperRoadSegmentation::updateParams(const std::vector<rclcpp::Parameter>& params) {
-    ph->setRuntimeParams(params);
-    nnNode->updateParams(params);
+#if DEPTHAI_VERSION_MAJOR < 3
+void NNWrapperRoadSegmentation::setXinXout(std::shared_ptr<dai::Pipeline> /*pipeline*/)
+{
 }
 
-}  // namespace dai_nodes
-}  // namespace depthai_ros_driver
+void NNWrapperRoadSegmentation::link(const dai::Node::Input in, const int linkType)
+{
+  nnNode->link(in, linkType);
+}
+
+dai::Node::Input NNWrapperRoadSegmentation::getInput(const int linkType)
+{
+  return nnNode->getInput(linkType);
+}
+#else
+void NNWrapperRoadSegmentation::setInOut(std::shared_ptr<dai::Pipeline> /*pipeline*/)
+{
+}
+
+void NNWrapperRoadSegmentation::link(dai::Node::Input& in, const int linkType)
+{
+  nnNode->link(in, linkType);
+}
+
+dai::Node::Input& NNWrapperRoadSegmentation::getInput(const int linkType)
+{
+  return nnNode->getInput(linkType);
+}
+#endif
+
+void NNWrapperRoadSegmentation::updateParams(const std::vector<rclcpp::Parameter>& params)
+{
+  // ph->setRuntimeParams(params);
+  nnNode->updateParams(params);
+}
+
+}

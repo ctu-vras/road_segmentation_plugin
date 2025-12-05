@@ -1,0 +1,17 @@
+{@THIS_FILE_IS_PROCESSED_BY_CMAKE_LOOK_INTO_INSTALL_FOLDER_FOR_THE_FINAL_FILE@
+    "model": {
+        "model_name": "@CMAKE_INSTALL_PREFIX@/share/@PROJECT_NAME@/models/ENet_triple_schoolyard_8_shaves.blob",
+        "zoo": "path"
+    },
+    "nn_config": {
+        "NN_family": "segmentation",
+        "confidence_threshold": 0.5
+    },
+    "mappings": {
+        "labels": [
+            "background",
+            "road",
+            "sky"
+        ]
+    }
+}
